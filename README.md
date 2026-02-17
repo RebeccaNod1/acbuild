@@ -40,6 +40,11 @@ Contains:
 - `cmake`, `clang`, `make`
 - User must have `sudo` privileges for systemd restarts.
 
+## Configuration
+
+**Note:** The script defaults to the standard AzerothCore credentials (`User: acore`, `Password: acore`).
+If you have changed your database password, you **must** edit the `mysqldump` commands in `build.sh` to match your setup.
+
 ## Installation
 
 ```bash
