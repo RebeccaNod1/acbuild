@@ -51,3 +51,7 @@ If you have changed your database password, you **must** edit the `mysqldump` co
 git clone https://github.com/RebeccaNod1/acbuild.git ~/acbuild
 chmod +x ~/acbuild/build.sh
 ```
+
+## Disclaimer
+
+This script was created with the assistance of AI. Always review code before running it on your production server.
