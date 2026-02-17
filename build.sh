@@ -87,6 +87,35 @@ if [ "$UPDATED" = false ]; then
 fi
 
 # ---------------------------------------
+# BACKUP (Pre-Build)
+# ---------------------------------------
+# Only runs if we didn't exit above (meaning UPDATED=true)
+BACKUP_ROOT="$HOME/ac_backups"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+CURRENT_BACKUP="$BACKUP_ROOT/$TIMESTAMP"
+
+echo "💾 Updates detected! Starting Backup to $CURRENT_BACKUP..."
+mkdir -p "$CURRENT_BACKUP"
+
+# Database Backup
+if command -v mysqldump &> /dev/null; then
+    echo "   -> Dumping databases..."
+    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_auth > "$CURRENT_BACKUP/acore_auth.sql"
+    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_world > "$CURRENT_BACKUP/acore_world.sql"
+    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_characters > "$CURRENT_BACKUP/acore_characters.sql"
+else
+    echo "⚠️  mysqldump not found! Skipping DB backup."
+fi
+
+# Configuration Backup
+if [ -d "$AC_DIR/env/dist/etc" ]; then
+    echo "   -> Backing up configs..."
+    mkdir -p "$CURRENT_BACKUP/etc"
+    cp -r "$AC_DIR/env/dist/etc/"* "$CURRENT_BACKUP/etc/"
+fi
+echo "✅ Backup Complete."
+
+# ---------------------------------------
 # CALCULATE CORES
 # ---------------------------------------
 # Calculate available cores safely.
