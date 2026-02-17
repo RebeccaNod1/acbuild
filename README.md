@@ -4,7 +4,7 @@ A custom Bash script for managing [AzerothCore](https://www.azerothcore.org/) se
 
 ## Features
 
-- **Automated Backups**: Automatically dumps `auth`, `world`, and `characters` databases + `etc` configs before every update.
+- **Automated Backups**: Automatically dumps databases and configs **only** when an update is detected or forced. No more redundant backups!
 - **Smart Updates**: Checks git revision for Core and all Modules. Skips rebuild if no changes (unless forced).
 - **Core Resource Management**: Calculates available CPU cores to maximize build speed without freezing the OS.
 - **Service Management**: Automatically restarts `ac-authserver` and `ac-worldserver` systemd services after install.
