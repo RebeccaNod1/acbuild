@@ -34,37 +34,6 @@ else
 fi
 
 # ---------------------------------------
-# BACKUP (Before Update)
-# ---------------------------------------
-BACKUP_ROOT="$HOME/ac_backups"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-CURRENT_BACKUP="$BACKUP_ROOT/$TIMESTAMP"
-
-echo "💾 Starting Backup to $CURRENT_BACKUP..."
-mkdir -p "$CURRENT_BACKUP"
-
-# Database Backup
-# Credentials accepted from config: acore/acore @ 127.0.0.1
-if command -v mysqldump &> /dev/null; then
-    echo "   -> Dumping databases..."
-    # Suppress password warning with 2>/dev/null if desired, keeping it visible for now
-    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_auth > "$CURRENT_BACKUP/acore_auth.sql"
-    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_world > "$CURRENT_BACKUP/acore_world.sql"
-    mysqldump --no-tablespaces -h127.0.0.1 -uacore -pacore acore_characters > "$CURRENT_BACKUP/acore_characters.sql"
-else
-    echo "⚠️  mysqldump not found! Skipping DB backup."
-fi
-
-# Configuration Backup
-if [ -d "$AC_DIR/env/dist/etc" ]; then
-    echo "   -> Backing up configs..."
-    mkdir -p "$CURRENT_BACKUP/etc"
-    cp -r "$AC_DIR/env/dist/etc/"* "$CURRENT_BACKUP/etc/"
-fi
-
-echo "✅ Backup Complete."
-
-# ---------------------------------------
 # UPDATE CORE
 # ---------------------------------------
 echo "🔵 Updating Core..."
