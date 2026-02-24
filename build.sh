@@ -6,6 +6,8 @@ set -e
 # Configuration
 AC_DIR="$HOME/azerothcore-wotlk"
 BUILD_DIR="$AC_DIR/build"
+BACKUP_ROOT="$HOME/ac_backups"
+MAX_BACKUPS=5
 
 # Parse Args
 FORCE=false
@@ -90,7 +92,6 @@ fi
 # BACKUP (Pre-Build)
 # ---------------------------------------
 # Only runs if we didn't exit above (meaning UPDATED=true)
-BACKUP_ROOT="$HOME/ac_backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 CURRENT_BACKUP="$BACKUP_ROOT/$TIMESTAMP"
 
@@ -113,6 +114,12 @@ if [ -d "$AC_DIR/env/dist/etc" ]; then
     mkdir -p "$CURRENT_BACKUP/etc"
     cp -r "$AC_DIR/env/dist/etc/"* "$CURRENT_BACKUP/etc/"
 fi
+
+# Cleanup old backups
+echo "🧹 Rotating backups (keeping last $MAX_BACKUPS)..."
+# List directories by time (newest first), skip the first N, and remove the rest
+ls -1dt "$BACKUP_ROOT"/*/ | tail -n +$(($MAX_BACKUPS + 1)) | xargs -r rm -rf
+
 echo "✅ Backup Complete."
 
 # ---------------------------------------

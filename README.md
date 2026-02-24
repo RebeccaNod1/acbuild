@@ -4,7 +4,8 @@ A custom Bash script for managing [AzerothCore](https://www.azerothcore.org/) se
 
 ## Features
 
-- **Automated Backups**: Automatically dumps databases and configs **only** when an update is detected or forced. No more redundant backups!
+- **Automated Backups**: Automatically dumps databases and configs **only** when an update is detected or forced.
+- **Backup Rotation**: Automatically keeps a configurable number of backups (default: 5) and prunes old ones.
 - **Smart Updates**: Checks git revision for Core and all Modules. Skips rebuild if no changes (unless forced).
 - **Core Resource Management**: Calculates available CPU cores to maximize build speed without freezing the OS.
 - **Service Management**: Automatically restarts `ac-authserver` and `ac-worldserver` systemd services after install.
@@ -24,8 +25,7 @@ A custom Bash script for managing [AzerothCore](https://www.azerothcore.org/) se
 
 ## Backup Location
 
-Backups are stored in:
-`~/ac_backups/YYYYMMDD_HHMMSS/`
+Backups are stored in `~/ac_backups/YYYYMMDD_HHMMSS/`. The script automatically prunes oldest backups to keep the count within the `MAX_BACKUPS` limit defined in `build.sh`.
 
 Contains:
 - `acore_auth.sql` (`--no-tablespaces` for privilege safety)
