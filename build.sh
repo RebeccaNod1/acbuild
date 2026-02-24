@@ -24,12 +24,12 @@ echo "Using AzerothCore directory: $AC_DIR"
 
 # Initialize UPDATED flag based on arguments
 if [ "$CLEAN" = true ]; then
-    echo "⚠️  Force build enabled: Skipping update check."
+    echo "⚠️  Force build enabled (Clean)."
     echo "🧹 Clean build enabled: Wiping build directory."
     rm -rf "$BUILD_DIR"
     UPDATED=true
 elif [ "$FORCE" = true ]; then
-    echo "⚠️  Force build enabled: Skipping update check."
+    echo "⚠️  Force build enabled."
     UPDATED=true
 else
     UPDATED=false
@@ -41,17 +41,13 @@ fi
 echo "🔵 Updating Core..."
 cd "$AC_DIR"
 
-if [ "$FORCE" = false ]; then
-    BEFORE_CORE=$(git rev-parse HEAD)
-    git pull
-    AFTER_CORE=$(git rev-parse HEAD)
+BEFORE_CORE=$(git rev-parse HEAD)
+git pull
+AFTER_CORE=$(git rev-parse HEAD)
 
-    if [ "$BEFORE_CORE" != "$AFTER_CORE" ]; then
-        echo "   -> Core updated."
-        UPDATED=true
-    fi
-else
-    echo "   -> Skipping core update check (Force)."
+if [ "$BEFORE_CORE" != "$AFTER_CORE" ]; then
+    echo "   -> Core updated."
+    UPDATED=true
 fi
 
 # ---------------------------------------
@@ -66,17 +62,13 @@ for d in modules/*/; do
         MOD_NAME=$(basename "$d")
         echo "   -> Checking $MOD_NAME..."
         
-        if [ "$FORCE" = false ]; then
-            BEFORE_MOD=$(git rev-parse HEAD)
-            git pull --quiet
-            AFTER_MOD=$(git rev-parse HEAD)
+        BEFORE_MOD=$(git rev-parse HEAD)
+        git pull --quiet
+        AFTER_MOD=$(git rev-parse HEAD)
 
-            if [ "$BEFORE_MOD" != "$AFTER_MOD" ]; then
-                echo "      [!] Updated!"
-                UPDATED=true
-            fi
-        else
-            echo "      Skipping update check (Force)."
+        if [ "$BEFORE_MOD" != "$AFTER_MOD" ]; then
+            echo "      [!] Updated!"
+            UPDATED=true
         fi
         cd "$AC_DIR"
     fi

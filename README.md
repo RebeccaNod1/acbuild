@@ -20,7 +20,7 @@ A custom Bash script for managing [AzerothCore](https://www.azerothcore.org/) se
 
 | Option    | Description |
 |-----------|-------------|
-| `--force` | Force a full rebuild and update, ignoring git status. |
+| `--force` | Perform a full rebuild and update. Still attempts to `git pull` but proceeds even if no updates are found. |
 | `--clean` | Wipe the `build` directory and start fresh (CMake + Make). |
 
 ## Backup Location
