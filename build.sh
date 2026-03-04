@@ -153,6 +153,15 @@ make install
 # ---------------------------------------
 # RESTART SERVICES
 # ---------------------------------------
+echo "🔵 Announcing Restart..."
+if screen -ls | grep -q 'worldserver'; then
+    screen -S worldserver -p 0 -X stuff "server announce Server shutting down for Jenkins Build Update in 180 seconds...^M"
+    echo "   -> Announcement sent. Waiting 180 seconds..."
+    sleep 180
+else
+    echo "⚠️  worldserver screen not found! Skipping announcement."
+fi
+
 echo "🔵 Restarting Services..."
 sudo systemctl restart ac-authserver.service
 sudo systemctl restart ac-worldserver.service
