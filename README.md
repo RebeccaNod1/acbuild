@@ -60,7 +60,7 @@ To get the most out of the Jenkins integration:
 3. Set the Repository URL to: `https://github.com/azerothcore/azerothcore-wotlk.git`
 4. Under **Additional Behaviors**, click Add -> **Check out to a sub-directory**. Set Local subdirectory to: `azerothcore-wotlk`. (Note: Ignore the Jenkins warning about using this in a pipeline, it is safe for Freestyle projects).
 5. **CRITICAL**: Under **Additional Behaviors**, click Add -> **Advanced clone behaviours**. Change the **Timeout (in minutes)** to `60` to ensure the initial massive checkout does not time out.
-6. Under **Build Steps**, add an **Execute shell** step and call the script (e.g., `/home/richard/acbuild/build.sh`).
+6. Under **Build Steps**, add an **Execute shell** step and call the script with a fallback for clean builds (e.g., `~/acbuild/build.sh || ~/acbuild/build.sh --force --clean`).
 7. Under **Post-build Actions**, add **Archive the artifacts** and specify `changelog.txt`.
 
 ## Installation
