@@ -36,19 +36,52 @@ else
 fi
 
 # ---------------------------------------
-# UPDATE CORE
+# INITIALIZE CHANGELOG
 # ---------------------------------------
-echo "🔵 Updating Core..."
-cd "$AC_DIR"
-
-BEFORE_CORE=$(git rev-parse HEAD)
-git pull
-AFTER_CORE=$(git rev-parse HEAD)
-
-if [ "$BEFORE_CORE" != "$AFTER_CORE" ]; then
-    echo "   -> Core updated."
-    UPDATED=true
+CHANGELOG_FILE="$BUILD_DIR/changelog.txt"
+if [ "$CLEAN" = true ] || [ "$FORCE" = true ]; then
+    echo "Manual build triggered. No changelog generated." > "$CHANGELOG_FILE"
+else
+    > "$CHANGELOG_FILE" # clear previous
 fi
+
+# ---------------------------------------
+# UPDATE CORE (Managed by Jenkins)
+# ---------------------------------------
+echo "🔵 Checking Core Updates..."
+cd "$AC_DIR" # Ensure we are in the AC_DIR for git operations
+
+# Jenkins sets GIT_PREVIOUS_COMMIT and GIT_COMMIT when it pulls the repo
+if [ -n "$GIT_PREVIOUS_COMMIT" ] && [ -n "$GIT_COMMIT" ]; then
+    if [ "$GIT_PREVIOUS_COMMIT" != "$GIT_COMMIT" ]; then
+        echo "   -> Core updated (detected via Jenkins)."
+        UPDATED=true
+        
+        # STILL NEED to pull the updates down to the actual build folder!
+        git pull --quiet
+        
+        # Capture changelog from Jenkins variables
+        echo "=== AzerothCore Updates ===" >> "$CHANGELOG_FILE"
+        git log ${GIT_PREVIOUS_COMMIT}..${GIT_COMMIT} --oneline >> "$CHANGELOG_FILE"
+        echo "" >> "$CHANGELOG_FILE"
+    fi
+else
+    # Fallback for manual runs outside of Jenkins
+    BEFORE_CORE=$(git rev-parse HEAD)
+    git pull
+    AFTER_CORE=$(git rev-parse HEAD)
+
+    if [ "$BEFORE_CORE" != "$AFTER_CORE" ]; then
+        echo "   -> Core updated."
+        UPDATED=true
+        
+        # Capture changelog
+        echo "=== AzerothCore Updates ===" >> "$CHANGELOG_FILE"
+        git log ${BEFORE_CORE}..${AFTER_CORE} --oneline >> "$CHANGELOG_FILE"
+        echo "" >> "$CHANGELOG_FILE"
+    fi
+fi
+
 
 # ---------------------------------------
 # UPDATE MODULES (Dynamic Loop)
@@ -62,6 +95,7 @@ for d in modules/*/; do
         MOD_NAME=$(basename "$d")
         echo "   -> Checking $MOD_NAME..."
         
+
         BEFORE_MOD=$(git rev-parse HEAD)
         git pull --quiet
         AFTER_MOD=$(git rev-parse HEAD)
@@ -69,11 +103,25 @@ for d in modules/*/; do
         if [ "$BEFORE_MOD" != "$AFTER_MOD" ]; then
             echo "      [!] Updated!"
             UPDATED=true
+            
+            # Capture changelog
+            echo "=== Module Updates: $MOD_NAME ===" >> "$CHANGELOG_FILE"
+            git log ${BEFORE_MOD}..${AFTER_MOD} --oneline >> "$CHANGELOG_FILE"
+            echo "" >> "$CHANGELOG_FILE"
         fi
+
         cd "$AC_DIR"
     fi
 done
 shopt -u nullglob
+
+# ---------------------------------------
+# EXPORT CHANGELOG TO JENKINS WORKSPACE
+# ---------------------------------------
+if [ -n "$WORKSPACE" ]; then
+    cp "$CHANGELOG_FILE" "$WORKSPACE/changelog.txt"
+    echo "📄 Changelog copied for Jenkins to archive."
+fi
 
 if [ "$UPDATED" = false ]; then
     echo "✅ Everything is already up to date. Skipping build and restart."

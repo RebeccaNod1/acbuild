@@ -9,6 +9,8 @@ A custom Bash script for managing [AzerothCore](https://www.azerothcore.org/) se
 - **Smart Updates**: Checks git revision for Core and all Modules. Skips rebuild if no changes (unless forced).
 - **Core Resource Management**: Calculates available CPU cores to maximize build speed without freezing the OS.
 - **Service Management**: Automatically restarts `ac-authserver` and `ac-worldserver` systemd services after install.
+- **Changelog Generation**: Generates a `changelog.txt` artifact summarizing core and module updates.
+- **Jenkins Integration**: Natively supports Jenkins `Source Code Management` to populate the `Changes` tab while still correctly identifying and pulling updates for modules.
 
 ## Usage
 
@@ -44,6 +46,22 @@ Contains:
 
 **Note:** The script defaults to the standard AzerothCore credentials (`User: acore`, `Password: acore`).
 If you have changed your database password, you **must** edit the `mysqldump` commands in `build.sh` to match your setup.
+
+## Jenkins Integration
+
+This script is fully optimized to run via Jenkins and provides two major quality-of-life features:
+1. **Changelog Artifacts**: The script generates a `changelog.txt` file and automatically copies it to your Jenkins `$WORKSPACE` if run via a job. You can view this by adding **Archive the artifacts** in your Post-build Actions and targeting `changelog.txt`. This changelog includes updates from *both* the core and installed modules.
+2. **Native "Changes" Tab Support**: The script is "Jenkins Aware". It detects when Jenkins has natively pulled an update via the `GIT_PREVIOUS_COMMIT` and `GIT_COMMIT` variables.
+
+### Jenkins Setup Guide
+To get the most out of the Jenkins integration:
+1. Create a **Freestyle Project**.
+2. Under **Source Code Management**, select **Git**.
+3. Set the Repository URL to: `https://github.com/azerothcore/azerothcore-wotlk.git`
+4. Under **Additional Behaviors**, click Add -> **Check out to a sub-directory**. Set Local subdirectory to: `azerothcore-wotlk`. (Note: Ignore the Jenkins warning about using this in a pipeline, it is safe for Freestyle projects).
+5. **CRITICAL**: Under **Additional Behaviors**, click Add -> **Advanced clone behaviours**. Change the **Timeout (in minutes)** to `60` to ensure the initial massive checkout does not time out.
+6. Under **Build Steps**, add an **Execute shell** step and call the script (e.g., `/home/richard/acbuild/build.sh`).
+7. Under **Post-build Actions**, add **Archive the artifacts** and specify `changelog.txt`.
 
 ## Installation
 
