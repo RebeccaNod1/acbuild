@@ -38,6 +38,7 @@ fi
 # ---------------------------------------
 # INITIALIZE CHANGELOG
 # ---------------------------------------
+mkdir -p "$BUILD_DIR"
 CHANGELOG_FILE="$BUILD_DIR/changelog.txt"
 if [ "$CLEAN" = true ] || [ "$FORCE" = true ]; then
     echo "Manual build triggered. No changelog generated." > "$CHANGELOG_FILE"
@@ -121,6 +122,13 @@ shopt -u nullglob
 if [ -n "$WORKSPACE" ]; then
     cp "$CHANGELOG_FILE" "$WORKSPACE/changelog.txt"
     echo "📄 Changelog copied for Jenkins to archive."
+fi
+
+# Failsafe: If the build directory doesn't exist or is empty (due to a previous failed crash), 
+# we MUST force a build regardless of Git updates.
+if [ ! -f "$BUILD_DIR/Makefile" ]; then
+    echo "⚠️  Missing Makefile detected. Forcing a build to recover the directory."
+    UPDATED=true
 fi
 
 if [ "$UPDATED" = false ]; then
